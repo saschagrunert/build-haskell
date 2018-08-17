@@ -1,0 +1,31 @@
+---
+version: 2
+workflows:
+  version: 2
+  pipeline:
+    jobs:
+      - build
+  nightly:
+    jobs:
+      - build
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Login to registry
+          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - run:
+          name: Build the image
+          command: docker build -t saschagrunert/build-haskell .
+      - run:
+          name: Push the image
+          command: docker push saschagrunert/build-haskell:latest
